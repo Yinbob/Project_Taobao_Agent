@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多平台商品推荐Agent</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .search-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+        
+        .search-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+        
+        .form-group input,
+        .form-group select {
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .platform-options {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .platform-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .platform-option:hover {
+            background: #e9ecef;
+        }
+        
+        .platform-option input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #667eea;
+        }
+        
+        .search-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            font-weight: 600;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: block;
+            margin: 0 auto;
+        }
+        
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        .search-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .results-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            display: none;
+        }
+        
+        .results-section.show {
+            display: block;
+        }
+        
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f1f3f4;
+        }
+        
+        .results-header h2 {
+            color: #333;
+            font-size: 1.5em;
+        }
+        
+        .results-stats {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .price-comparison {
+            margin-bottom: 30px;
+        }
+        
+        .comparison-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .comparison-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .platform-prices {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+        
+        .platform-price {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #e1e5e9;
+        }
+        
+        .platform-price.min-price {
+            border-color: #28a745;
+            background: #f8fff9;
+        }
+        
+        .platform-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .price-value {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #667eea;
+        }
+        
+        .min-price .price-value {
+            color: #28a745;
+        }
+        
+        .savings {
+            color: #28a745;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        
+        .recommendations {
+            margin-top: 30px;
+        }
+        
+        .recommendations h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+        
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        .product-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 1px solid #e1e5e9;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+        
+        .product-image {
+            height: 200px;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 0.9em;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .product-info {
+            padding: 20px;
+        }
+        
+        .product-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            line-height: 1.4;
+            height: 2.8em;
+            overflow: hidden;
+        }
+        
+        .product-price {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #e74c3c;
+            margin-bottom: 10px;
+        }
+        
+        .product-meta {
+            display: flex;
+            justify-content: space-between;
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+        
+        .product-score {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        .product-rank {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: #e74c3c;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9em;
+        }
+        
+        .error-message {
+            background: #fee;
+            color: #c00;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .error-message.show {
+            display: block;
+        }
+        
+        .features-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            margin-top: 30px;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .feature-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-3px);
+        }
+        
+        .feature-icon {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+        
+        .feature-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .feature-desc {
+            color: #666;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .search-form {
+                grid-template-columns: 1fr;
+            }
+            
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛒 多平台商品推荐Agent</h1>
+            <p>智能商品推荐系统，支持淘宝、京东、拼多多等多平台价格对比</p>
+        </div>
+        
+        <div class="search-section">
+            <form id="searchForm" class="search-form">
+                <div class="form-group">
+                    <label for="query">商品关键词</label>
+                    <input type="text" id="query" name="query" placeholder="例如：华为Mate70 Pro、苹果笔记本" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="budgetMin">最低预算 (元)</label>
+                    <input type="number" id="budgetMin" name="budget_min" placeholder="0" min="0" step="100">
+                </div>
+                
+                <div class="form-group">
+                    <label for="budgetMax">最高预算 (元)</label>
+                    <input type="number" id="budgetMax" name="budget_max" placeholder="10000" min="0" step="100">
+                </div>
+                
+                <div class="form-group">
+                    <label>选择平台</label>
+                    <div class="platform-options">
+                        <label class="platform-option">
+                            <input type="checkbox" name="platforms" value="jd" checked>
+                            <span>京东</span>
+                        </label>
+                        <label class="platform-option">
+                            <input type="checkbox" name="platforms" value="taobao" checked>
+                            <span>淘宝/天猫</span>
+                        </label>
+                        <label class="platform-option">
+                            <input type="checkbox" name="platforms" value="pdd" checked>
+                            <span>拼多多</span>
+                        </label>
+                    </div>
+                </div>
+            </form>
+            
+            <button type="button" id="searchBtn" class="search-btn" onclick="searchProducts()">
+                🔍 开始搜索
+            </button>
+        </div>
+        
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>正在搜索多平台商品信息，请稍候...</p>
+        </div>
+        
+        <div id="errorMessage" class="error-message"></div>
+        
+        <div id="resultsSection" class="results-section">
+            <div class="results-header">
+                <h2>📊 搜索结果</h2>
+                <div id="resultsStats" class="results-stats"></div>
+            </div>
+            
+            <div id="priceComparison" class="price-comparison">
+                <h3>💰 多平台价格对比</h3>
+                <div id="comparisonCards"></div>
+            </div>
+            
+            <div id="recommendations" class="recommendations">
+                <h3>🎯 推荐商品</h3>
+                <div id="productGrid" class="product-grid"></div>
+            </div>
+        </div>
+        
+        <div class="features-section">
+            <h2 style="text-align: center; color: #333; margin-bottom: 10px;">✨ 核心功能</h2>
+            <p style="text-align: center; color: #666; margin-bottom: 30px;">为您提供全方位的购物决策支持</p>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <div class="feature-title">多平台对比</div>
+                    <div class="feature-desc">同时搜索淘宝、京东、拼多多，比较同款商品价格，找到最优惠的购买渠道</div>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <div class="feature-title">智能推荐</div>
+                    <div class="feature-desc">基于价格、销量、店铺信誉等多维度评分，为您推荐性价比最高的商品</div>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">💰</div>
+                    <div class="feature-title">预算优化</div>
+                    <div class="feature-desc">根据您的预算范围，智能筛选商品，确保每一分钱都花在刀刃上</div>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <div class="feature-title">实时数据</div>
+                    <div class="feature-desc">实时获取电商平台最新价格和库存信息，确保推荐结果的时效性</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        async function searchProducts() {
+            const query = document.getElementById('query').value.trim();
+            const budgetMin = parseFloat(document.getElementById('budgetMin').value) || 0;
+            const budgetMax = parseFloat(document.getElementById('budgetMax').value) || 10000;
+            
+            // 获取选中的平台
+            const platformCheckboxes = document.querySelectorAll('input[name="platforms"]:checked');
+            const platforms = Array.from(platformCheckboxes).map(cb => cb.value);
+            
+            // 验证输入
+            if (!query) {
+                showError('请输入商品关键词');
+                return;
+            }
+            
+            if (platforms.length === 0) {
+                showError('请至少选择一个平台');
+                return;
+            }
+            
+            if (budgetMin > budgetMax) {
+                showError('最低预算不能高于最高预算');
+                return;
+            }
+            
+            // 显示加载状态
+            showLoading(true);
+            hideError();
+            hideResults();
+            
+            try {
+                // 发送搜索请求
+                const response = await fetch('/api/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: query,
+                        budget_min: budgetMin,
+                        budget_max: budgetMax,
+                        platforms: platforms,
+                        top_n: 10
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayResults(data.data);
+                } else {
+                    showError(data.message || '搜索失败，请重试');
+                }
+            } catch (error) {
+                showError('网络错误，请检查连接后重试');
+                console.error('Search error:', error);
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        function displayResults(data) {
+            // 显示统计信息
+            const statsElement = document.getElementById('resultsStats');
+            statsElement.textContent = `找到 ${data.total_products_found} 件商品，耗时 ${data.search_time.toFixed(2)} 秒`;
+            
+            // 显示价格对比
+            displayPriceComparisons(data.price_comparisons);
+            
+            // 显示推荐商品
+            displayRecommendations(data.recommendations);
+            
+            // 显示结果区域
+            showResults();
+        }
+        
+        function displayPriceComparisons(comparisons) {
+            const container = document.getElementById('comparisonCards');
+            container.innerHTML = '';
+            
+            if (!comparisons || comparisons.length === 0) {
+                container.innerHTML = '<p style="color: #666; text-align: center;">暂无价格对比数据</p>';
+                return;
+            }
+            
+            comparisons.forEach(comparison => {
+                const card = document.createElement('div');
+                card.className = 'comparison-card';
+                
+                let platformsHtml = '';
+                for (const [platform, product] of Object.entries(comparison.platforms)) {
+                    const isMinPrice = platform === comparison.min_price_platform;
+                    const platformNames = {
+                        'jd': '京东',
+                        'taobao': '淘宝/天猫',
+                        'pdd': '拼多多'
+                    };
+                    
+                    platformsHtml += `
+                        <div class="platform-price ${isMinPrice ? 'min-price' : ''}">
+                            <div class="platform-name">${platformNames[platform] || platform}</div>
+                            <div class="price-value">¥${product.price.toFixed(2)}</div>
+                            ${isMinPrice ? '<div class="savings">最低价</div>' : ''}
+                        </div>
+                    `;
+                }
+                
+                card.innerHTML = `
+                    <div class="comparison-title">${comparison.product_title}</div>
+                    <div class="platform-prices">
+                        ${platformsHtml}
+                    </div>
+                    <div style="margin-top: 10px; color: #666; font-size: 0.9em;">
+                        价格差异: ¥${comparison.price_difference.toFixed(2)} (${comparison.price_difference_percentage.toFixed(1)}%)
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+        
+        function displayRecommendations(recommendations) {
+            const container = document.getElementById('productGrid');
+            container.innerHTML = '';
+            
+            if (!recommendations || recommendations.length === 0) {
+                container.innerHTML = '<p style="color: #666; text-align: center;">暂无推荐商品</p>';
+                return;
+            }
+            
+            const platformNames = {
+                'jd': '京东',
+                'taobao': '淘宝/天猫',
+                'pdd': '拼多多'
+            };
+            
+            recommendations.forEach(rec => {
+                const product = rec.product;
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.style.position = 'relative';
+                
+                card.innerHTML = `
+                    <div class="product-rank">${rec.rank}</div>
+                    <div class="product-image">
+                        ${product.image_url ? 
+                            `<img src="${product.image_url}" alt="${product.title}" style="max-width: 100%; max-height: 100%; object-fit: contain;">` : 
+                            '暂无图片'
+                        }
+                    </div>
+                    <div class="product-info">
+                        <div class="product-title">${product.title}</div>
+                        <div class="product-price">¥${product.price.toFixed(2)}</div>
+                        <div class="product-meta">
+                            <span>${platformNames[product.platform] || product.platform}</span>
+                            <span>${product.sales ? `销量: ${product.sales}` : ''}</span>
+                        </div>
+                        <div class="product-score">综合评分: ${(rec.total_score * 100).toFixed(1)}分</div>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+        
+        function showLoading(show) {
+            const loading = document.getElementById('loading');
+            const searchBtn = document.getElementById('searchBtn');
+            
+            if (show) {
+                loading.classList.add('show');
+                searchBtn.disabled = true;
+                searchBtn.textContent = '搜索中...';
+            } else {
+                loading.classList.remove('show');
+                searchBtn.disabled = false;
+                searchBtn.textContent = '🔍 开始搜索';
+            }
+        }
+        
+        function showError(message) {
+            const errorElement = document.getElementById('errorMessage');
+            errorElement.textContent = message;
+            errorElement.classList.add('show');
+        }
+        
+        function hideError() {
+            const errorElement = document.getElementById('errorMessage');
+            errorElement.classList.remove('show');
+        }
+        
+        function showResults() {
+            const resultsSection = document.getElementById('resultsSection');
+            resultsSection.classList.add('show');
+        }
+        
+        function hideResults() {
+            const resultsSection = document.getElementById('resultsSection');
+            resultsSection.classList.remove('show');
+        }
+        
+        // 回车键触发搜索
+        document.getElementById('query').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchProducts();
+            }
+        });
+    </script>
+</body>
+</html>
