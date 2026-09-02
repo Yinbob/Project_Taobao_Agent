@@ -51,6 +51,9 @@ test_*.py
 # Trae configuration
 .trae/
 
+# Old directory (moved to root)
+taobao_agent/
+
 # Temporary files
 *.tmp
 *.bak
