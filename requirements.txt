@@ -2,8 +2,11 @@
 # MCP Python SDK
 mcp>=1.0.0
 
-# 多平台价格对比MCP服务
+# 多平台价格对比MCP服务（京东/淘宝/天猫）
 best-price-mcp>=0.3.0
+
+# 拼多多MCP服务（需要多多进宝认证）
+pdd-selection-mcp>=0.3.0
 
 # MCP UI SDK
 mcp-ui-server>=0.1.0

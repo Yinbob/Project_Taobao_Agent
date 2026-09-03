@@ -13,13 +13,27 @@ class Config:
     PORT: int = int(os.getenv("PORT", "8000"))
     
     # MCP服务器配置
+    # best-price: 京东/淘宝(天猫)比价，通过腾讯云SCF代理实时搜索
+    # pdd-selection: 拼多多搜索，需要多多进宝认证（PDD_PROXY_URL/PDD_PROXY_TOKEN）
     MCP_SERVERS: Dict[str, Dict[str, Any]] = {
         "best-price": {
             "command": "best-price-mcp",
             "args": [],
             "env": {}
+        },
+        "pdd-selection": {
+            "command": "pdd-selection-mcp",
+            "args": [],
+            "env": {
+                "PDD_PROXY_URL": os.getenv("PDD_PROXY_URL", ""),
+                "PDD_PROXY_TOKEN": os.getenv("PDD_PROXY_TOKEN", "")
+            }
         }
     }
+    
+    # MCP数据源配置
+    MCP_ENABLED: bool = True  # 是否启用真实MCP数据源（为False时全部使用模拟数据）
+    MCP_PDD_ENABLED: bool = os.getenv("MCP_PDD_ENABLED", "false").lower() == "true"  # 拼多多需要认证，默认关闭
     
     # 推荐算法权重配置
     RECOMMENDATION_WEIGHTS: Dict[str, float] = {
