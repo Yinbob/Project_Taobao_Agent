@@ -32,7 +32,6 @@ class Config:
     }
     
     # MCP数据源配置
-    MCP_ENABLED: bool = True  # 是否启用真实MCP数据源（为False时全部使用模拟数据）
     MCP_PDD_ENABLED: bool = os.getenv("MCP_PDD_ENABLED", "false").lower() == "true"  # 拼多多需要认证，默认关闭
     
     # 推荐算法权重配置
@@ -77,6 +76,26 @@ class Config:
     SALES_SCORE_PARAMS: Dict[str, float] = {
         "log_base": 10,        # 对数底数
         "max_sales_cap": 100000 # 最大销量上限
+    }
+
+    # 模糊匹配参数（用于识别不同平台的同款商品）
+    FUZZY_MATCH_PARAMS: Dict[str, Any] = {
+        "similarity_threshold": 0.35,      # 判定为同款商品的相似度阈值
+        "sequence_weight": 0.4,            # 字符序列相似度权重
+        "token_weight": 0.6,               # 关键词重合度权重
+        "capacity_conflict_penalty": 0.4,  # 容量/配置不一致时的惩罚系数
+        # 标题清洗时需剔除的营销噪声词（店铺/服务信息对同款判断是干扰）
+        "noise_words": [
+            "正品", "包邮", "官方", "旗舰店", "专营店", "百亿补贴", "新款",
+            "热卖", "现货", "速发", "顺丰", "自营", "全新", "联保", "行货",
+            "官网", "保证", "当天发", "急速"
+        ],
+        # 品牌别名统一（英文品牌 -> 中文，便于跨语言标题匹配）
+        "brand_aliases": {
+            "apple": "苹果", "huawei": "华为", "xiaomi": "小米",
+            "samsung": "三星", "honor": "荣耀", "sony": "索尼",
+            "dell": "戴尔", "lenovo": "联想", "redmi": "红米"
+        }
     }
 
 # 创建全局配置实例

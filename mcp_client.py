@@ -4,7 +4,9 @@
 
 数据源说明:
 - 京东/淘宝(天猫): 通过 best-price-mcp 模块，基于腾讯云SCF代理实时搜索
-- 拼多多: 可通过 pdd-selection-mcp 模块（需要多多进宝认证），认证失败时回退到模拟数据
+- 拼多多: 可通过 pdd-selection-mcp 模块（需要多多进宝认证）
+
+数据源不可用或未搜索到商品时返回空结果，不使用模拟数据兜底。
 """
 
 import hashlib
@@ -89,59 +91,54 @@ class MCPClient:
         self.connected = False
         print("已断开MCP服务器连接")
     
-    async def compare_price(self, query: str, platform: str = "all", 
-                            price_min: float = 0, price_max: float = 0) -> List[Dict[str, Any]]:
+    async def compare_price(self, query: str, platform: str = "all") -> List[Dict[str, Any]]:
         """
         比较商品价格
-        
+
         Args:
             query: 商品关键词
             platform: 平台选择（jd, taobao, pdd, all）
-            price_min: 最低价格（用于降级模拟数据的生成）
-            price_max: 最高价格（用于降级模拟数据的生成）
-        
+
         Returns:
-            价格比较结果列表
+            价格比较结果列表，未搜索到时返回空列表
         """
         if not self.connected:
             raise Exception("MCP服务器未连接")
-        
+
+        if not self.use_direct_module:
+            # best_price_mcp模块不可用，无法获取真实数据
+            return []
+
         try:
-            if self.use_direct_module:
-                # 调用best_price_mcp的内部比价函数，返回JSON格式数据
-                result_str = best_price_mcp._compare_price(query, platform)
-                
-                # 解析JSON结果
-                if isinstance(result_str, str):
-                    try:
-                        data = json.loads(result_str)
-                    except json.JSONDecodeError:
-                        print("解析best_price_mcp结果失败，返回原始文本")
-                        return self._get_mock_comparison_data(query, platform, price_min, price_max)
-                elif isinstance(result_str, dict):
-                    data = result_str
-                else:
-                    return self._get_mock_comparison_data(query, platform, price_min, price_max)
-                
-                # 如果返回了hint提示（模糊输入/非标品/链接），降级使用模拟数据
-                if isinstance(data, dict) and data.get("hint"):
-                    print(f"best_price_mcp提示: {data.get('hint')}，降级使用模拟数据")
-                    return self._get_mock_comparison_data(query, platform, price_min, price_max)
-                
-                # 将best_price_mcp的JSON数据转换为统一的比较格式
-                converted = self._convert_comparison_data(query, data, platform)
-                if not converted:
-                    print("best_price_mcp未返回有效结果，降级使用模拟数据")
-                    return self._get_mock_comparison_data(query, platform, price_min, price_max)
-                return converted
+            # 调用best_price_mcp的内部比价函数，返回JSON格式数据
+            result_str = best_price_mcp._compare_price(query, platform)
+
+            # 解析JSON结果
+            if isinstance(result_str, str):
+                try:
+                    data = json.loads(result_str)
+                except json.JSONDecodeError:
+                    print("解析best_price_mcp结果失败")
+                    return []
+            elif isinstance(result_str, dict):
+                data = result_str
             else:
-                # 如果没有best_price_mcp模块，返回模拟数据
-                return self._get_mock_comparison_data(query, platform, price_min, price_max)
-                
+                return []
+
+            # 如果返回了hint提示（模糊输入/非标品/链接），视为未搜索到
+            if isinstance(data, dict) and data.get("hint"):
+                print(f"best_price_mcp提示: {data.get('hint')}")
+                return []
+
+            # 将best_price_mcp的JSON数据转换为统一的比较格式
+            converted = self._convert_comparison_data(query, data, platform)
+            if not converted:
+                print("best_price_mcp未返回有效结果")
+            return converted
+
         except Exception as e:
             print(f"调用compare_price失败: {e}")
-            # 返回模拟数据
-            return self._get_mock_comparison_data(query, platform, price_min, price_max)
+            return []
     
     async def search_products(self, keyword: str, platform: str = "taobao", 
                             price_min: float = 0, price_max: float = 0) -> List[Product]:
@@ -170,12 +167,12 @@ class MCPClient:
                     )
                     if products:
                         return products
-                # 拼多多不可用或未返回结果，回退到模拟数据
-                print("拼多多搜索不可用，返回模拟数据")
-                return self._get_mock_products(keyword, platform, price_min, price_max)
+                # 拼多多不可用或未搜索到商品，返回空列表
+                print("拼多多搜索不可用或未搜索到商品")
+                return []
             
             # 京东/淘宝(天猫)使用best_price_mcp
-            comparisons = await self.compare_price(keyword, platform, price_min, price_max)
+            comparisons = await self.compare_price(keyword, platform)
             
             products = []
             for comparison in comparisons:
@@ -237,8 +234,7 @@ class MCPClient:
             
         except Exception as e:
             print(f"搜索商品失败: {e}")
-            # 返回模拟数据
-            return self._get_mock_products(keyword, platform, price_min, price_max)
+            return []
     
     async def _search_pdd_products(self, keyword: str, price_min: float, 
                                    price_max: float) -> List[Product]:
@@ -480,185 +476,13 @@ class MCPClient:
             platform: 平台
         
         Returns:
-            商品详情
+            商品详情，数据源不支持时返回None（由上层返回404）
         """
         if not self.connected:
             raise Exception("MCP服务器未连接")
-        
-        try:
-            # 由于best_price_mcp没有直接的get_product_details方法，
-            # 我们返回一个模拟的商品详情
-            return self._get_mock_product_details(product_id, platform)
-            
-        except Exception as e:
-            print(f"获取商品详情失败: {e}")
-            return None
-    
-    def _get_mock_comparison_data(self, query: str, platform: str, 
-                                  price_min: float = 0, price_max: float = 0) -> List[Dict[str, Any]]:
-        """获取模拟的价格比较数据
-        
-        当给定预算范围时，生成落在预算范围内的模拟价格。
-        """
-        # 根据预算范围生成合理的基础价格
-        base_price = 4999.00
-        if price_min > 0 and price_max > 0:
-            # 在预算范围内取中位偏下作为基础价
-            base_price = (price_min + price_max) / 2 * 0.9
-        elif price_min > 0:
-            base_price = max(price_min * 1.2, 499.00)
-        elif price_max > 0:
-            base_price = min(price_max * 0.85, 4999.00)
-        
-        # 生成三个平台的价格（略有差异，用于价格对比）
-        prices = {
-            "jd": round(base_price, 2),
-            "taobao": round(base_price * 0.98, 2),
-            "pdd": round(base_price * 0.96, 2)
-        }
-        
-        mock_data = [
-            {
-                "product_title": query,
-                "platforms": {
-                    "jd": {
-                        "id": "jd_001",
-                        "title": f"{query} - 京东自营",
-                        "price": prices["jd"],
-                        "shop_name": "京东自营",
-                        "shop_type": "自营",
-                        "sales": 15000,
-                        "rating": 4.9,
-                        "url": "https://item.jd.com/123456.html",
-                        "image_url": ""
-                    },
-                    "taobao": {
-                        "id": "taobao_001",
-                        "title": f"{query} - 天猫旗舰店",
-                        "price": prices["taobao"],
-                        "shop_name": "品牌旗舰店",
-                        "shop_type": "旗舰店",
-                        "sales": 25000,
-                        "rating": 4.8,
-                        "url": "https://detail.tmall.com/item.htm?id=123456",
-                        "image_url": ""
-                    },
-                    "pdd": {
-                        "id": "pdd_001",
-                        "title": f"{query} - 拼多多百亿补贴",
-                        "price": prices["pdd"],
-                        "shop_name": "品牌官方店",
-                        "shop_type": "官方店",
-                        "sales": 8000,
-                        "rating": 4.7,
-                        "url": "https://mobile.yangkeduo.com/goods.html?goods_id=123456",
-                        "image_url": ""
-                    }
-                },
-                "min_price": prices["pdd"],
-                "min_price_platform": "pdd",
-                "max_price": prices["jd"],
-                "price_difference": round(prices["jd"] - prices["pdd"], 2),
-                "price_difference_percentage": round((prices["jd"] - prices["pdd"]) / prices["pdd"] * 100, 2)
-            }
-        ]
-        
-        # 如果指定了平台，只返回该平台的数据
-        if platform != "all":
-            for item in mock_data:
-                if platform in item["platforms"]:
-                    item["platforms"] = {platform: item["platforms"][platform]}
-        
-        return mock_data
-    
-    def _get_mock_products(self, keyword: str, platform: str, 
-                          price_min: float, price_max: float) -> List[Product]:
-        """获取模拟的商品数据
-        
-        当给定预算范围时，生成落在预算范围内的模拟价格。
-        """
-        # 根据预算范围生成合理的基础价格
-        base_price = 4999.00
-        if price_min > 0 and price_max > 0:
-            # 在预算范围内取中位偏下作为基础价
-            base_price = (price_min + price_max) / 2 * 0.9
-        elif price_min > 0:
-            base_price = max(price_min * 1.2, 499.00)
-        elif price_max > 0:
-            base_price = min(price_max * 0.85, 4999.00)
-        
-        # 各平台价格略有差异
-        prices = {
-            "jd": round(base_price, 2),
-            "taobao": round(base_price * 0.98, 2),
-            "pdd": round(base_price * 0.96, 2)
-        }
-        
-        mock_products = [
-            Product(
-                id="mock_001",
-                title=f"{keyword} - 旗舰版",
-                price=prices["jd"],
-                platform=Platform.JD,
-                shop_name="京东自营",
-                shop_type="自营",
-                sales=15000,
-                rating=4.9
-            ),
-            Product(
-                id="mock_002",
-                title=f"{keyword} - 标准版",
-                price=prices["taobao"],
-                platform=Platform.TAOBAO,
-                shop_name="品牌旗舰店",
-                shop_type="旗舰店",
-                sales=25000,
-                rating=4.8
-            ),
-            Product(
-                id="mock_003",
-                title=f"{keyword} - 经济版",
-                price=prices["pdd"],
-                platform=Platform.PDD,
-                shop_name="品牌官方店",
-                shop_type="官方店",
-                sales=8000,
-                rating=4.7
-            )
-        ]
-        
-        # 应用平台过滤
-        if platform != "all":
-            mock_products = [p for p in mock_products if p.platform.value == platform]
-        
-        # 应用价格过滤
-        filtered_products = []
-        for product in mock_products:
-            if price_min > 0 and product.price < price_min:
-                continue
-            if price_max > 0 and product.price > price_max:
-                continue
-            filtered_products.append(product)
-        
-        return filtered_products
-    
-    def _get_mock_product_details(self, product_id: str, platform: str) -> Product:
-        """获取模拟的商品详情"""
-        return Product(
-            id=product_id,
-            title=f"商品详情 - {product_id}",
-            price=4999.00,
-            platform=Platform(platform) if platform in ["jd", "taobao", "pdd"] else Platform.JD,
-            shop_name="品牌旗舰店",
-            shop_type="旗舰店",
-            sales=15000,
-            rating=4.9,
-            specs={
-                "颜色": "黑色",
-                "内存": "8GB",
-                "存储": "256GB"
-            }
-        )
+
+        # best_price_mcp / pdd_selection_mcp 均不提供单商品详情查询接口
+        return None
 
 # 创建全局MCP客户端实例
 mcp_client = MCPClient()
