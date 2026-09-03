@@ -1,0 +1,26 @@
+/* 测试 CSS 文件 */
+body {
+    background-color: #f0f0f0;
+    font-family: Arial, sans-serif;
+}
+
+.test-container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 30px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+h1 {
+    color: #333;
+    text-align: center;
+}
+
+.static-test {
+    margin-top: 20px;
+    padding: 20px;
+    background: #e8f4fd;
+    border-left: 4px solid #2196F3;
+}
