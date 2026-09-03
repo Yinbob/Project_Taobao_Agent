@@ -387,5 +387,99 @@ class RecommendationEngine:
 
         return comparisons
 
+    def filter_by_relevance(self, products: List[Product], 
+                            query: str) -> List[Product]:
+        """
+        根据用户原始查询中的核心品类词，过滤掉**完全不相关**的商品。
+
+        这是第一道防线（query_expander 做的是源头堵歧义）之后的第二道防线：
+        即便底层 MCP 因为某个歧义词返回了鼠标垫、电笔这种完全不沾边的结果，
+        这里也能把它们拦下来。
+
+        两层判定（AND 关系，满足任一即可保留）：
+        A. **短语命中**：商品标题的 normalized 文本里包含任何一个**完整的核心品类短语**
+           （例如核心短语是 "笔记本电脑"，标题 "联想小新Pro16轻薄笔记本电脑..." 包含完整短语 → 保留；
+            但标题 "适用ThinkPad X1笔记本无线鼠标" 里 "笔记本" 是修饰词，"笔记本电脑" 作为整体没出现 → 走 B）
+        B. **Token 强重合**：当短语没命中时，退回到 token 集合交集，但加一个门槛：
+           至少要有 2 个不同核心 token 同时出现（防止只沾了 1 个边就过关）
+
+        Args:
+            products: 待过滤的商品列表
+            query: 用户原始查询（从中提取核心品类词）
+
+        Returns:
+            过滤后的商品列表（与输入同序）
+        """
+        from query_expander import query_expander
+
+        core_terms = query_expander.extract_core_terms(query)
+        if not core_terms or not products:
+            return products
+
+        core_phrases = [self._normalize_title(t) for t in core_terms if t.strip()]
+        core_phrases = [p for p in core_phrases if p]
+
+        core_tokens: Set[str] = set()
+        for phrase in core_phrases:
+            core_tokens.update(self._extract_tokens(phrase))
+
+        if not core_phrases and not core_tokens:
+            return products
+
+        # 配件标记词：商品标题如果是 "XX笔记本 无线鼠标" 这种
+        # 品类短语后面紧跟的是这类词，说明它是配件而非品类本体
+        accessory_suffixes = (
+            "鼠标", "键盘", "硬盘盒", "支架", "散热", "贴膜", "内胆包",
+            "双肩包", "皮包", "保护套", "充电器", "电源", "适配器",
+            "扩展坞", "转接头", "数据线", "耳机", "摄像头", "音箱",
+            "清洁", "键盘膜", "屏幕膜", "外壳", "底座", "鼠标垫",
+            "包", "套", "膜", "壳", "支架", "托架",
+        )
+
+        kept: List[Product] = []
+        dropped_count = 0
+        for p in products:
+            norm_title = self._normalize_title(p.title or "")
+            if not norm_title:
+                dropped_count += 1
+                continue
+
+            # A. 短语命中优先，但排除「品类短语 + 配件后缀」的情况
+            phrase_hit = False
+            matched_phrase = None
+            accessory_hit = False
+            for phrase in core_phrases:
+                if phrase in norm_title:
+                    idx = norm_title.index(phrase)
+                    after = norm_title[idx + len(phrase): idx + len(phrase) + 8]
+                    if any(suf in after for suf in accessory_suffixes):
+                        accessory_hit = True
+                        continue
+                    phrase_hit = True
+                    matched_phrase = phrase
+                    break
+
+            if phrase_hit:
+                kept.append(p)
+                continue
+
+            # 如果短语出现过但都被配件标记挡了 → 直接 drop
+            # （说明这个商品是配件，不是品类本体）
+            if accessory_hit:
+                dropped_count += 1
+                continue
+
+            # B. 退回 token 交集，但要求 >= 2 个 token 同时命中
+            title_tokens = self._extract_tokens(norm_title)
+            overlap = title_tokens & core_tokens
+            if len(overlap) >= 2:
+                kept.append(p)
+            else:
+                dropped_count += 1
+
+        if dropped_count:
+            print(f"[RelevanceFilter] 原始 {len(products)} 件 → 过滤掉 {dropped_count} 件不相关商品 → 剩余 {len(kept)} 件")
+        return kept
+
 # 创建全局推荐引擎实例
 recommendation_engine = RecommendationEngine()
