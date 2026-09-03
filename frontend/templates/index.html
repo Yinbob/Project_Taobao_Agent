@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>智能商品推荐系统</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         /* 完整的CSS样式 - 保留旧模板的完整性，添加新改进 */
@@ -21,45 +23,45 @@
             --primary-50: rgba(99, 102, 241, 0.05);
             --primary-100: rgba(99, 102, 241, 0.1);
             --primary-200: rgba(99, 102, 241, 0.2);
-            
+
             --secondary: #ec4899;
             --secondary-light: #f472b6;
             --secondary-dark: #db2777;
-            
+
             --accent: #06b6d4;
             --accent-light: #22d3ee;
             --accent-dark: #0891b2;
-            
+
             --success: #10b981;
             --success-light: #34d399;
             --success-dark: #059669;
-            
+
             --warning: #f59e0b;
             --warning-light: #fbbf24;
             --warning-dark: #d97706;
-            
+
             --danger: #ef4444;
             --danger-light: #f87171;
             --danger-dark: #dc2626;
-            
+
             --dark: #0f172a;
             --dark-light: #1e293b;
             --dark-lighter: #334155;
-            
+
             --gray: #64748b;
             --gray-light: #94a3b8;
             --gray-lighter: #cbd5e1;
             --gray-100: #f1f5f9;
             --gray-200: #e2e8f0;
-            
+
             --white: #ffffff;
             --black: #000000;
-            
+
             --glass: rgba(255, 255, 255, 0.1);
             --glass-strong: rgba(255, 255, 255, 0.15);
             --glass-border: rgba(255, 255, 255, 0.2);
             --glass-border-strong: rgba(255, 255, 255, 0.3);
-            
+
             --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
             --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -67,7 +69,7 @@
             --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
             --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
             --shadow-2xl: 0 35px 60px -15px rgba(0, 0, 0, 0.3);
-            
+
             --radius-sm: 6px;
             --radius: 8px;
             --radius-md: 12px;
@@ -75,7 +77,7 @@
             --radius-xl: 20px;
             --radius-2xl: 24px;
             --radius-full: 9999px;
-            
+
             --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
             --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
             --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -117,15 +119,25 @@
             width: 200%;
             height: 200%;
             background: radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 20%, rgba(236, 72, 153, 0.08) 0%, transparent 50%),
-                        radial-gradient(circle at 40% 80%, rgba(6, 182, 212, 0.06) 0%, transparent 50%);
+                radial-gradient(circle at 80% 20%, rgba(236, 72, 153, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(6, 182, 212, 0.06) 0%, transparent 50%);
             animation: float 20s ease-in-out infinite;
         }
 
         @keyframes float {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            33% { transform: translate(30px, -30px) rotate(1deg); }
-            66% { transform: translate(-20px, 20px) rotate(-1deg); }
+
+            0%,
+            100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+
+            33% {
+                transform: translate(30px, -30px) rotate(1deg);
+            }
+
+            66% {
+                transform: translate(-20px, 20px) rotate(-1deg);
+            }
         }
 
         .container {
@@ -365,7 +377,7 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
             transition: 0.5s;
         }
 
@@ -430,13 +442,25 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .loading p {
@@ -468,9 +492,21 @@
         }
 
         @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-5px); }
-            40%, 80% { transform: translateX(5px); }
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            20%,
+            60% {
+                transform: translateX(-5px);
+            }
+
+            40%,
+            80% {
+                transform: translateX(5px);
+            }
         }
 
         .error-message i {
@@ -498,8 +534,15 @@
         }
 
         @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .results-header {
@@ -701,6 +744,10 @@
             position: relative;
         }
 
+        .product-card[data-product-url] {
+            cursor: pointer;
+        }
+
         .product-card:hover {
             transform: translateY(-10px) scale(1.02);
             box-shadow: var(--shadow-2xl);
@@ -728,7 +775,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, transparent 0%, rgba(0,0,0,0.1) 100%);
+            background: linear-gradient(135deg, transparent 0%, rgba(0, 0, 0, 0.1) 100%);
         }
 
         .product-image img {
@@ -896,7 +943,7 @@
         .feature-card:hover {
             transform: translateY(-8px);
             border-color: var(--primary);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
         }
 
         .feature-card:hover::before {
@@ -939,17 +986,17 @@
             .container {
                 padding: 30px 16px;
             }
-            
+
             .header h1 {
                 font-size: 2.8em;
             }
-            
+
             .search-section,
             .results-section,
             .features-section {
                 padding: 30px;
             }
-            
+
             .product-grid {
                 grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             }
@@ -959,37 +1006,37 @@
             .header h1 {
                 font-size: 2.2em;
             }
-            
+
             .header p {
                 font-size: 1em;
             }
-            
+
             .search-form {
                 grid-template-columns: 1fr;
             }
-            
+
             .platform-options {
                 flex-direction: column;
             }
-            
+
             .platform-option {
                 min-width: 100%;
             }
-            
+
             .results-header {
                 flex-direction: column;
                 gap: 16px;
                 text-align: center;
             }
-            
+
             .product-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .features-header h2 {
                 font-size: 1.6em;
             }
-            
+
             .feature-card {
                 padding: 24px;
             }
@@ -999,20 +1046,20 @@
             .header h1 {
                 font-size: 1.8em;
             }
-            
+
             .search-btn {
                 width: 100%;
                 padding: 16px;
             }
-            
+
             .product-card {
                 margin: 0 8px;
             }
-            
+
             .product-info {
                 padding: 20px;
             }
-            
+
             .product-price {
                 font-size: 1.5em;
             }
@@ -1046,23 +1093,47 @@
 
         /* 动画库 */
         @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
         }
 
         @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
         }
 
         @keyframes glow {
-            0%, 100% { box-shadow: 0 0 5px var(--primary-200); }
-            50% { box-shadow: 0 0 20px var(--primary-200); }
+
+            0%,
+            100% {
+                box-shadow: 0 0 5px var(--primary-200);
+            }
+
+            50% {
+                box-shadow: 0 0 20px var(--primary-200);
+            }
         }
 
         /* 减少动画偏好 */
         @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after {
+
+            *,
+            *::before,
+            *::after {
                 animation-duration: 0.01ms !important;
                 animation-iteration-count: 1 !important;
                 transition-duration: 0.01ms !important;
@@ -1070,15 +1141,16 @@
         }
     </style>
 </head>
+
 <body>
     <div class="bg-animation"></div>
-    
+
     <div class="container">
         <div class="header">
             <h1>智能商品推荐系统</h1>
             <p>跨平台智能比价 · AI驱动推荐 · 省钱省心</p>
         </div>
-        
+
         <div class="search-section">
             <form id="searchForm" class="search-form">
                 <div class="form-group">
@@ -1088,7 +1160,7 @@
                     </label>
                     <input type="text" id="query" name="query" placeholder="例如：华为Mate70 Pro、苹果笔记本" required>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="budgetMin">
                         <i class="fas fa-dollar-sign"></i>
@@ -1096,7 +1168,7 @@
                     </label>
                     <input type="number" id="budgetMin" name="budget_min" placeholder="0" min="0" step="100">
                 </div>
-                
+
                 <div class="form-group">
                     <label for="budgetMax">
                         <i class="fas fa-dollar-sign"></i>
@@ -1104,7 +1176,7 @@
                     </label>
                     <input type="number" id="budgetMax" name="budget_max" placeholder="10000" min="0" step="100">
                 </div>
-                
+
                 <div class="form-group">
                     <label>
                         <i class="fas fa-store"></i>
@@ -1126,23 +1198,23 @@
                     </div>
                 </div>
             </form>
-            
+
             <button type="button" id="searchBtn" class="search-btn" onclick="searchProducts()">
                 <i class="fas fa-search"></i>
                 开始搜索
             </button>
         </div>
-        
+
         <div id="loading" class="loading">
             <div class="spinner"></div>
             <p>正在搜索多平台商品信息，请稍候...</p>
         </div>
-        
+
         <div id="errorMessage" class="error-message">
             <i class="fas fa-exclamation-circle"></i>
             <span id="errorText"></span>
         </div>
-        
+
         <div id="resultsSection" class="results-section">
             <div class="results-header">
                 <h2>
@@ -1151,7 +1223,7 @@
                 </h2>
                 <div id="resultsStats" class="results-stats"></div>
             </div>
-            
+
             <div id="priceComparison" class="price-comparison">
                 <h3>
                     <i class="fas fa-balance-scale"></i>
@@ -1159,7 +1231,7 @@
                 </h3>
                 <div id="comparisonCards"></div>
             </div>
-            
+
             <div id="recommendations" class="recommendations">
                 <h3>
                     <i class="fas fa-star"></i>
@@ -1168,13 +1240,13 @@
                 <div id="productGrid" class="product-grid"></div>
             </div>
         </div>
-        
+
         <div class="features-section">
             <div class="features-header">
                 <h2>✨ 核心功能</h2>
                 <p>为您提供全方位的购物决策支持</p>
             </div>
-            
+
             <div class="features-grid">
                 <div class="feature-card">
                     <div class="feature-icon">
@@ -1183,7 +1255,7 @@
                     <div class="feature-title">多平台对比</div>
                     <div class="feature-desc">同时搜索淘宝、京东、拼多多，比较同款商品价格，找到最优惠的购买渠道</div>
                 </div>
-                
+
                 <div class="feature-card">
                     <div class="feature-icon">
                         <i class="fas fa-brain"></i>
@@ -1191,7 +1263,7 @@
                     <div class="feature-title">智能推荐</div>
                     <div class="feature-desc">基于价格、销量、店铺信誉等多维度评分，为您推荐性价比最高的商品</div>
                 </div>
-                
+
                 <div class="feature-card">
                     <div class="feature-icon">
                         <i class="fas fa-piggy-bank"></i>
@@ -1199,7 +1271,7 @@
                     <div class="feature-title">预算优化</div>
                     <div class="feature-desc">根据您的预算范围，智能筛选商品，确保每一分钱都花在刀刃上</div>
                 </div>
-                
+
                 <div class="feature-card">
                     <div class="feature-icon">
                         <i class="fas fa-bolt"></i>
@@ -1210,7 +1282,7 @@
             </div>
         </div>
     </div>
-    
+
     <script>
         // 平台名称映射
         const platformNames = {
@@ -1223,32 +1295,32 @@
             const query = document.getElementById('query').value.trim();
             const budgetMin = parseFloat(document.getElementById('budgetMin').value) || 0;
             const budgetMax = parseFloat(document.getElementById('budgetMax').value) || 10000;
-            
+
             // 获取选中的平台
             const platformCheckboxes = document.querySelectorAll('input[name="platforms"]:checked');
             const platforms = Array.from(platformCheckboxes).map(cb => cb.value);
-            
+
             // 验证输入
             if (!query) {
                 showError('请输入商品关键词');
                 return;
             }
-            
+
             if (platforms.length === 0) {
                 showError('请至少选择一个平台');
                 return;
             }
-            
+
             if (budgetMin > budgetMax) {
                 showError('最低预算不能高于最高预算');
                 return;
             }
-            
+
             // 显示加载状态
             showLoading(true);
             hideError();
             hideResults();
-            
+
             try {
                 // 发送搜索请求
                 const response = await fetch('/api/search', {
@@ -1264,9 +1336,9 @@
                         top_n: 10
                     })
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.success) {
                     displayResults(data.data);
                 } else {
@@ -1279,34 +1351,34 @@
                 showLoading(false);
             }
         }
-        
+
         function displayResults(data) {
             // 显示统计信息
             const statsElement = document.getElementById('resultsStats');
             statsElement.textContent = `找到 ${data.total_products_found} 件商品，耗时 ${data.search_time.toFixed(2)} 秒`;
-            
+
             // 显示价格对比
             displayPriceComparisons(data.price_comparisons);
-            
+
             // 显示推荐商品
             displayRecommendations(data.recommendations);
-            
+
             // 显示结果区域
             showResults();
-            
+
             // 滚动到结果区域
             setTimeout(() => {
-                document.getElementById('resultsSection').scrollIntoView({ 
+                document.getElementById('resultsSection').scrollIntoView({
                     behavior: 'smooth',
                     block: 'start'
                 });
             }, 100);
         }
-        
+
         function displayPriceComparisons(comparisons) {
             const container = document.getElementById('comparisonCards');
             container.innerHTML = '';
-            
+
             if (!comparisons || comparisons.length === 0) {
                 container.innerHTML = `
                     <div style="text-align: center; padding: 40px; color: var(--gray-light);">
@@ -1316,15 +1388,15 @@
                 `;
                 return;
             }
-            
+
             comparisons.forEach(comparison => {
                 const card = document.createElement('div');
                 card.className = 'comparison-card';
-                
+
                 let platformsHtml = '';
                 for (const [platform, product] of Object.entries(comparison.platforms)) {
                     const isMinPrice = platform === comparison.min_price_platform;
-                    
+
                     platformsHtml += `
                         <div class="platform-price ${isMinPrice ? 'min-price' : ''}">
                             <div class="platform-name">${platformNames[platform] || platform}</div>
@@ -1332,7 +1404,7 @@
                         </div>
                     `;
                 }
-                
+
                 card.innerHTML = `
                     <div class="comparison-title">${comparison.product_title}</div>
                     <div class="platform-prices">
@@ -1343,15 +1415,15 @@
                         <span class="highlight">${comparison.price_difference_percentage.toFixed(1)}% 差价</span>
                     </div>
                 `;
-                
+
                 container.appendChild(card);
             });
         }
-        
+
         function displayRecommendations(recommendations) {
             const container = document.getElementById('productGrid');
             container.innerHTML = '';
-            
+
             if (!recommendations || recommendations.length === 0) {
                 container.innerHTML = `
                     <div style="text-align: center; padding: 60px 20px; color: var(--gray-light); grid-column: 1 / -1;">
@@ -1362,24 +1434,49 @@
                 `;
                 return;
             }
-            
+
             recommendations.forEach(rec => {
                 const product = rec.product;
                 const card = document.createElement('div');
                 card.className = 'product-card';
-                
+
+                if (product.product_url) {
+                    try {
+                        const productUrl = new URL(product.product_url, window.location.origin);
+                        if (productUrl.protocol === 'http:' || productUrl.protocol === 'https:') {
+                            card.dataset.productUrl = productUrl.href;
+                            card.tabIndex = 0;
+                            card.setAttribute('role', 'link');
+                            card.addEventListener('click', () => {
+                                const newWindow = window.open(productUrl.href, '_blank', 'noopener,noreferrer');
+                                if (newWindow) {
+                                    newWindow.opener = null;
+                                }
+                            });
+                            card.addEventListener('keydown', event => {
+                                if (event.key === 'Enter' || event.key === ' ') {
+                                    event.preventDefault();
+                                    card.click();
+                                }
+                            });
+                        }
+                    } catch (error) {
+                        console.warn('商品链接无效:', product.product_url);
+                    }
+                }
+
                 const scorePercentage = (rec.total_score * 100).toFixed(1);
-                
+
                 card.innerHTML = `
                     <div class="product-rank">${rec.rank}</div>
                     <div class="product-image">
-                        ${product.image_url ? 
-                            `<img src="${product.image_url}" alt="${product.title}" loading="lazy">` : 
-                            `<div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                        ${product.image_url ?
+                        `<img src="${product.image_url}" alt="${product.title}" loading="lazy">` :
+                        `<div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
                                 <i class="fas fa-image" style="font-size: 2em; opacity: 0.3;"></i>
                                 <span>暂无图片</span>
                             </div>`
-                        }
+                    }
                     </div>
                     <div class="product-info">
                         <div class="product-title">${product.title}</div>
@@ -1396,15 +1493,15 @@
                         </div>
                     </div>
                 `;
-                
+
                 container.appendChild(card);
             });
         }
-        
+
         function showLoading(show) {
             const loading = document.getElementById('loading');
             const searchBtn = document.getElementById('searchBtn');
-            
+
             if (show) {
                 loading.classList.add('show');
                 searchBtn.disabled = true;
@@ -1415,51 +1512,51 @@
                 searchBtn.innerHTML = '<i class="fas fa-search"></i> 开始搜索';
             }
         }
-        
+
         function showError(message) {
             const errorElement = document.getElementById('errorMessage');
             const errorText = document.getElementById('errorText');
             errorText.textContent = message;
             errorElement.classList.add('show');
         }
-        
+
         function hideError() {
             const errorElement = document.getElementById('errorMessage');
             errorElement.classList.remove('show');
         }
-        
+
         function showResults() {
             const resultsSection = document.getElementById('resultsSection');
             resultsSection.classList.add('show');
         }
-        
+
         function hideResults() {
             const resultsSection = document.getElementById('resultsSection');
             resultsSection.classList.remove('show');
         }
-        
+
         // 回车键触发搜索
-        document.getElementById('query').addEventListener('keypress', function(e) {
+        document.getElementById('query').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 searchProducts();
             }
         });
-        
+
         // 添加输入框焦点效果
         document.querySelectorAll('input[type="text"], input[type="number"]').forEach(input => {
-            input.addEventListener('focus', function() {
+            input.addEventListener('focus', function () {
                 this.parentElement.style.transform = 'translateY(-2px)';
             });
-            
-            input.addEventListener('blur', function() {
+
+            input.addEventListener('blur', function () {
                 this.parentElement.style.transform = 'translateY(0)';
             });
         });
-        
+
         // 平台选择动画
         document.querySelectorAll('.platform-option').forEach(option => {
-            option.addEventListener('click', function() {
+            option.addEventListener('click', function () {
                 const checkbox = this.querySelector('input[type="checkbox"]');
                 if (checkbox.checked) {
                     this.style.transform = 'scale(1.02)';
@@ -1471,4 +1568,5 @@
         });
     </script>
 </body>
+
 </html>
